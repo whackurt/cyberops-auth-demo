@@ -4,8 +4,9 @@ import { Button, Input } from '@nextui-org/react';
 import { EyeSlashFilledIcon } from '../components/icons/EyeSlashFilledIcon';
 import { EyeFilledIcon } from '../components/icons/EyeFilledIcon';
 import { FaRegCheckCircle } from 'react-icons/fa';
-import { SignUpUser } from '../services/auth';
-import { Link } from 'react-router-dom';
+import { SendOtp, SignUpUser } from '../services/auth';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../store/useAuthStore';
 
 const Signup = () => {
 	const [isVisible, setIsVisible] = React.useState(false);
@@ -20,6 +21,10 @@ const Signup = () => {
 
 	const [success, setSuccess] = React.useState(false);
 	const [message, setMessage] = React.useState('');
+
+	const navigate = useNavigate();
+
+	const { setEmail, setPassword } = useAuthStore((state) => state);
 
 	const invalidColor = '#808080';
 	const validColor = '#089e00';
@@ -76,21 +81,21 @@ const Signup = () => {
 		}
 	};
 
-	const signup = async () => {
-		if (valid) {
-			setIsLoading(true);
-			const res = await SignUpUser(signupData);
+	const verify = async () => {
+		setIsLoading(true);
 
-			if (res.status === 201) {
-				const data = res.data;
-				setSuccess(data.success);
-				setMessage(data.message);
-			} else {
-				setSuccess(false);
-				setMessage(res.response.data.message);
+		if (valid) {
+			await setEmail(signupData.email);
+			await setPassword(signupData.password);
+
+			const res = await SendOtp({ email: signupData.email });
+
+			if (res.status == 200) {
+				navigate('/verify');
 			}
-			setIsLoading(false);
 		}
+
+		setIsLoading(false);
 	};
 
 	return (
@@ -197,7 +202,7 @@ const Signup = () => {
 							variant="bordered"
 							isLoading={isLoading}
 							disabled={!valid}
-							onClick={signup}
+							onClick={verify}
 						>
 							Sign Up
 						</Button>

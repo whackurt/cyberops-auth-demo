@@ -4,7 +4,7 @@ import { Button, Input } from '@nextui-org/react';
 import { EyeSlashFilledIcon } from '../components/icons/EyeSlashFilledIcon';
 import { EyeFilledIcon } from '../components/icons/EyeFilledIcon';
 import { LoginUser } from '../services/auth';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
 	const [isVisible, setIsVisible] = React.useState(false);
@@ -13,6 +13,8 @@ const Login = () => {
 	const [message, setMessage] = React.useState('');
 
 	const [loginData, setLoginData] = React.useState({});
+
+	const navigate = useNavigate();
 
 	const toggleVisibility = () => setIsVisible(!isVisible);
 
@@ -26,6 +28,9 @@ const Login = () => {
 
 			setSuccess(data.success);
 			setMessage(data.message);
+			localStorage.setItem('access_token', data.token);
+
+			navigate('/');
 		} else {
 			setSuccess(false);
 			setMessage(res.response.data.message);
